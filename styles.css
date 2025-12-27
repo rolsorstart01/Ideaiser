@@ -396,6 +396,33 @@ body {
     cursor: not-allowed;
 }
 
+.admin-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toggle-pro-btn {
+    background: transparent;
+    border: 1px solid #10b981;
+    color: #10b981;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.toggle-pro-btn:hover {
+    background: #10b981;
+    color: white;
+}
+
+.toggle-pro-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
 .hidden {
     display: none !important;
 }

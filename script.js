@@ -717,9 +717,14 @@ function initAuth() {
                 <td><span class="role-badge role-${u.role || 'user'}">${u.role || 'user'}</span></td>
                 <td><span class="${u.isPro ? 'pro-badge' : ''}">${u.isPro ? 'YES' : 'NO'}</span></td>
                 <td>
-                    <button class="promote-btn" onclick="window.promoteUser('${u.id}', '${u.role}')" ${u.email === SUPER_ADMIN_EMAIL || u.role === 'admin' ? 'disabled' : ''}>
-                        Make Admin
-                    </button>
+                    <div class="admin-actions">
+                        <button class="promote-btn" onclick="window.promoteUser('${u.id}', '${u.role}')" ${u.email === SUPER_ADMIN_EMAIL || u.role === 'admin' ? 'disabled' : ''}>
+                            Make Admin
+                        </button>
+                        <button class="toggle-pro-btn" onclick="window.toggleProStatus('${u.id}', ${u.isPro})" ${currentUser.email !== SUPER_ADMIN_EMAIL ? 'disabled' : ''}>
+                            Toggle Pro
+                        </button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -728,8 +733,19 @@ function initAuth() {
     window.promoteUser = async (uid, currentRole) => {
         if (currentRole === 'admin') return;
         const userRef = doc(db, "users", uid);
-        await updateDoc(userRef, { role: 'admin' });
-        alert("User promoted to Admin! 🚀");
+        await updateDoc(userRef, {
+            role: 'admin',
+            isPro: true
+        });
+        alert("User promoted to Admin and granted Pro access! 🚀");
+        fetchUsers();
+    };
+
+    window.toggleProStatus = async (uid, currentStatus) => {
+        if (currentUser.email !== SUPER_ADMIN_EMAIL) return;
+        const userRef = doc(db, "users", uid);
+        await updateDoc(userRef, { isPro: !currentStatus });
+        alert(`User Pro status updated to ${!currentStatus ? 'Active' : 'Free'}`);
         fetchUsers();
     };
 
