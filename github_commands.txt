@@ -1,0 +1,16 @@
+# HOW TO PUSH UPDATES TO GITHUB
+
+Whenever you make changes to your code and want to see them on GitHub, run these 3 commands in your terminal:
+
+1. Stage your changes:
+   git add .
+
+2. Commit your changes (write what you did inside the quotes):
+   git commit -m "updated the ai coach"
+
+3. Push to GitHub:
+   git push
+
+-----------------------------------------------------------
+NOTE: If 'git' is not recognized, restart your VS Code!
+-----------------------------------------------------------
