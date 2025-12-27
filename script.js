@@ -441,12 +441,14 @@ class UIController {
     }
 
     async runAnalysis() {
+        if (!checkPlanLimit()) return;
         if (this.els.input.value.length < 10) return alert("Please enter more details!");
 
         this.els.btn.classList.add('loading');
         await new Promise(r => setTimeout(r, 1500)); // Fake think time
 
         const data = this.coach.evaluate(this.els.input.value);
+        incrementAnalysis();
         this.renderpResults(data);
 
         this.els.btn.classList.remove('loading');
@@ -598,9 +600,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// --- Payment & Plan Logic ---
-let analysisCount = 0;
+// --- Persistence & Plan Logic ---
+let isPro = localStorage.getItem('ideaiser_pro') === 'true';
+let analysisCount = parseInt(localStorage.getItem('ideaiser_count') || '0');
 const MAX_FREE_ANALYSES = 3;
+
+function updatePlanUI() {
+    const proBtn = document.getElementById('proPlanBtn');
+    const pricingSection = document.getElementById('pricingSection');
+
+    if (isPro) {
+        if (proBtn) {
+            proBtn.innerText = "Pro Member ✨";
+            proBtn.disabled = true;
+            proBtn.classList.add('pro-active');
+        }
+        // Optionally hide pricing grid if Pro
+        const pricingGrid = document.querySelector('.pricing-grid');
+        if (pricingGrid) pricingGrid.style.opacity = "0.7";
+    }
+}
+
+function incrementAnalysis() {
+    analysisCount++;
+    localStorage.setItem('ideaiser_count', analysisCount.toString());
+}
+
+function checkPlanLimit() {
+    if (!isPro && analysisCount >= MAX_FREE_ANALYSES) {
+        alert("Free limit reached! Please upgrade to Pro for unlimited analyses. 🚀");
+        document.getElementById('pricingSection').scrollIntoView({ behavior: 'smooth' });
+        return false;
+    }
+    return true;
+}
 
 function initPayments() {
     const RAZORPAY_KEY_ID = 'rzp_live_RuaMsQ3mGUXGtH';
@@ -609,8 +642,12 @@ function initPayments() {
     const donateBtn = document.getElementById('donateBtn');
     const donateAmountInput = document.getElementById('donationAmount');
 
+    updatePlanUI();
+
     if (proBtn) {
         proBtn.addEventListener('click', () => {
+            if (isPro) return;
+
             const options = {
                 "key": RAZORPAY_KEY_ID,
                 "amount": "50000", // ₹500 in paise
@@ -618,7 +655,10 @@ function initPayments() {
                 "name": "Ideaiser Pro",
                 "description": "3 Months Special Offer",
                 "handler": function (response) {
-                    alert("Welcome to Pro! Payment ID: " + response.razorpay_payment_id);
+                    isPro = true;
+                    localStorage.setItem('ideaiser_pro', 'true');
+                    updatePlanUI();
+                    alert("Welcome to Pro! Your access is now permanent on this browser. ✨");
                 },
                 "theme": { "color": "#667eea" }
             };
