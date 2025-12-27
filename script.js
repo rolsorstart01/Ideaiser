@@ -143,6 +143,61 @@ class IdeaCoach {
         return text.toLowerCase().replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
     }
 
+    // --- Gibberish & Context Validation ---
+    validateIdea(text) {
+        const norm = this.normalize(text);
+        const words = norm.split(' ').filter(w => w.length > 0);
+
+        // 1. Minimum Content Check
+        if (words.length < 5) {
+            return { valid: false, reason: "Please provide a bit more detail (at least 5-10 words) describing your business idea so I can give you a quality analysis!" };
+        }
+
+        // 2. Gibberish Detection (Hardened)
+        // Check for high consonant-to-vowel ratio
+        const vowels = (norm.match(/[aeiou]/g) || []).length;
+        const totalChars = norm.replace(/\s/g, '').length;
+        if (totalChars > 10 && (vowels / totalChars) < 0.15) {
+            return { valid: false, reason: "The input looks like gibberish or random characters. Please provide a clear business idea in English." };
+        }
+
+        // Check for "keyboard smashing" patterns
+        const smashPatterns = [/asdf/i, /sdfg/i, /dfgh/i, /fghj/i, /ghjk/i, /hjkl/i, /qwerty/i, /zxcv/i, /xcvb/i];
+        if (smashPatterns.some(p => p.test(norm))) {
+            return { valid: false, reason: "The input appears to be random keyboard patterns. Please enter a valid business description." };
+        }
+
+        // Check for character repetition (e.g., "aaaaaaaaaaa")
+        if (/(.)\1{4,}/.test(norm)) {
+            return { valid: false, reason: "Repeated character clusters detected. Please enter a real business concept." };
+        }
+
+        // Check for word repetition (e.g., "idea idea idea idea idea")
+        const wordCounts = {};
+        words.forEach(w => wordCounts[w] = (wordCounts[w] || 0) + 1);
+        const maxRep = Math.max(...Object.values(wordCounts));
+        if (maxRep > words.length * 0.6 && words.length > 5) {
+            return { valid: false, reason: "The input is too repetitive. Please provide a more descriptive and varied business idea." };
+        }
+
+        // 3. Business Context Check (Strict)
+        const businessContextTokens = [
+            'app', 'service', 'sell', 'product', 'platform', 'online', 'store', 'market',
+            'customer', 'user', 'charge', 'money', 'revenue', 'business', 'startup',
+            'solution', 'problem', 'fix', 'help', 'provide', 'offer', 'build', 'create',
+            'delivery', 'software', 'website', 'agency', 'consulting', 'manufacturing',
+            'ai', 'smart', 'tech', 'digital', 'physical', 'local', 'global', 'subscription'
+        ];
+        const contextMatches = businessContextTokens.filter(k => norm.includes(k));
+
+        // If content is short AND has very few business tokens, it's likely not a business idea
+        if (words.length < 15 && contextMatches.length < 1) {
+            return { valid: false, reason: "This doesn't seem like a business idea. Please mention things like what you want to build, who your users are, or how you'll make money." };
+        }
+
+        return { valid: true };
+    }
+
     // --- Scoring Logic (Efficient Version) ---
     calculateScore(text) {
         const norm = this.normalize(text);
@@ -161,15 +216,15 @@ class IdeaCoach {
 
         const check = (keys) => keys.reduce((acc, k) => acc + (norm.includes(k) ? 1 : 0), 0);
 
-        // Base Scores
+        // Base Scores (Lowered for more dynamic range)
         const scores = {
-            marketPotential: 50 + (check(keywords.market) * 8),
-            uniqueness: 45 + (check(keywords.unique) * 9),
-            scalability: 50 + (check(keywords.scale) * 8),
-            feasibility: 60 + (check(keywords.feasible) * 6) - (norm.includes('hardware') ? 15 : 0),
-            competition: 50 + (norm.includes('competitor') ? 5 : 0) + (check(keywords.unique) * 5),
-            targetAudience: 45 + (check(keywords.audience) * 9),
-            riskAssessment: 50 + (check(keywords.risk_low) * 8) - (check(keywords.risk_high) * 10)
+            marketPotential: 25 + (check(keywords.market) * 12),
+            uniqueness: 20 + (check(keywords.unique) * 14),
+            scalability: 25 + (check(keywords.scale) * 12),
+            feasibility: 35 + (check(keywords.feasible) * 10) - (norm.includes('hardware') ? 15 : 0),
+            competition: 30 + (norm.includes('competitor') ? 5 : 0) + (check(keywords.unique) * 5),
+            targetAudience: 20 + (check(keywords.audience) * 14),
+            riskAssessment: 30 + (check(keywords.risk_low) * 12) - (check(keywords.risk_high) * 15)
         };
 
         // Length Bonus
@@ -464,12 +519,19 @@ class UIController {
 
     async runAnalysis() {
         if (!checkPlanLimit()) return;
-        if (this.els.input.value.length < 10) return alert("Please enter more details!");
+        const ideaText = this.els.input.value;
+        const validation = this.coach.validateIdea(ideaText);
+
+        if (!validation.valid) {
+            alert(validation.reason);
+            this.els.btn.classList.remove('loading');
+            return;
+        }
 
         this.els.btn.classList.add('loading');
         await new Promise(r => setTimeout(r, 1500)); // Fake think time
 
-        const data = this.coach.evaluate(this.els.input.value);
+        const data = this.coach.evaluate(ideaText);
         incrementAnalysis();
         this.renderpResults(data);
 
