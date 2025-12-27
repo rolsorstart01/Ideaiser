@@ -85,6 +85,7 @@
                 <div id="userProfile" class="user-profile hidden">
                     <img id="userAvatar" src="" alt="User">
                     <span id="userName"></span>
+                    <button id="adminLink" class="admin-link hidden">Admin Panel</button>
                     <button id="logoutBtn" class="logout-btn">Sign Out</button>
                 </div>
                 <button id="loginBtn" class="login-btn">
@@ -416,6 +417,32 @@
                     </button>
                 </div>
             </section>
+            <!-- Admin Panel Modal -->
+            <div id="adminModal" class="modal hidden">
+                <div class="modal-content admin-modal-card glass">
+                    <button class="close-modal" id="closeAdmin">&times;</button>
+                    <h2>Admin Management</h2>
+                    <div class="admin-search-box">
+                        <input type="text" id="userSearch" placeholder="Search users by email...">
+                    </div>
+                    <div class="user-list-container">
+                        <table class="user-table">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Pro</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userTableBody">
+                                <!-- Users will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
 
         <!-- Footer -->

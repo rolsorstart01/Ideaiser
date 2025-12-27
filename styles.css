@@ -291,9 +291,109 @@ body {
     transition: all var(--transition-normal);
 }
 
-.logout-btn:hover {
-    background: var(--danger);
+.admin-link {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--accent-primary);
+    color: var(--accent-primary);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+}
+
+.admin-link:hover {
+    background: var(--accent-primary);
     color: white;
+}
+
+/* Admin Modal Specifics */
+.admin-modal-card {
+    max-width: 800px !important;
+}
+
+.admin-search-box {
+    margin-bottom: 2rem;
+}
+
+.admin-search-box input {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: white;
+    font-size: 1rem;
+}
+
+.user-list-container {
+    max-height: 400px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.user-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.user-table th,
+.user-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9rem;
+}
+
+.user-table th {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.role-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.role-admin {
+    background: rgba(139, 92, 246, 0.2);
+    color: #8b5cf6;
+}
+
+.role-user {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+}
+
+.pro-badge {
+    color: #10b981;
+    font-weight: 800;
+}
+
+.promote-btn {
+    background: var(--accent-primary);
+    border: none;
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.promote-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .hidden {

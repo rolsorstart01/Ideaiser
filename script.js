@@ -6,7 +6,7 @@
 // Firebase Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB-thQN6nJD64nWM6gA9IWoxShe4gNoqm4",
@@ -605,6 +605,8 @@ function fillExampleList(id, items) {
 }
 
 // --- Firebase Auth & Firestore Sync ---
+const SUPER_ADMIN_EMAIL = "reyhansingh01@gmail.com";
+
 function initAuth() {
     const loginBtn = document.getElementById('loginBtn');
     const googleLoginBtn = document.getElementById('googleLoginBtn');
@@ -612,65 +614,50 @@ function initAuth() {
     const profile = document.getElementById('userProfile');
     const avatar = document.getElementById('userAvatar');
     const name = document.getElementById('userName');
+    const adminLink = document.getElementById('adminLink');
 
-    // Modal elements
+    // Modals
     const authModal = document.getElementById('authModal');
+    const adminModal = document.getElementById('adminModal');
     const closeAuth = document.getElementById('closeAuth');
-    const showSignIn = document.getElementById('showSignIn');
-    const showSignUp = document.getElementById('showSignUp');
-    const authForm = document.getElementById('emailAuthForm');
-    const authTitle = document.getElementById('authTitle');
-    const authSubmit = document.getElementById('authSubmit');
+    const closeAdmin = document.getElementById('closeAdmin');
+
+    // Admin Panel Elements
+    const userSearch = document.getElementById('userSearch');
+    const userTableBody = document.getElementById('userTableBody');
 
     let isSigningUp = false;
 
-    // Modal Control
+    // Modal Controls
     loginBtn.addEventListener('click', () => authModal.classList.remove('hidden'));
     closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
-    window.addEventListener('click', (e) => { if (e.target === authModal) authModal.classList.add('hidden'); });
-
-    // Toggle Sign In / Sign Up
-    showSignIn.addEventListener('click', () => {
-        isSigningUp = false;
-        showSignIn.classList.add('active');
-        showSignUp.classList.remove('active');
-        authTitle.innerText = "Welcome Back";
-        authSubmit.innerText = "Sign In";
+    adminLink.addEventListener('click', () => {
+        adminModal.classList.remove('hidden');
+        fetchUsers();
     });
+    closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
 
-    showSignUp.addEventListener('click', () => {
-        isSigningUp = true;
-        showSignUp.classList.add('active');
-        showSignIn.classList.remove('active');
-        authTitle.innerText = "Create Account";
-        authSubmit.innerText = "Sign Up";
-    });
+    // Auth Toggles
+    const showSignIn = document.getElementById('showSignIn');
+    const showSignUp = document.getElementById('showSignUp');
+    const authTitle = document.getElementById('authTitle');
+    const authSubmit = document.getElementById('authSubmit');
+    const authForm = document.getElementById('emailAuthForm');
 
-    // Google Login
-    googleLoginBtn.addEventListener('click', async () => {
-        try {
-            await signInWithPopup(auth, provider);
-            authModal.classList.add('hidden');
-        } catch (e) { alert("Login failed: " + e.message); }
-    });
+    showSignIn.addEventListener('click', () => { isSigningUp = false; showSignIn.classList.add('active'); showSignUp.classList.remove('active'); authTitle.innerText = "Welcome Back"; authSubmit.innerText = "Sign In"; });
+    showSignUp.addEventListener('click', () => { isSigningUp = true; showSignUp.classList.add('active'); showSignIn.classList.remove('active'); authTitle.innerText = "Create Account"; authSubmit.innerText = "Sign Up"; });
 
-    // Email/Password Auth
+    googleLoginBtn.addEventListener('click', async () => { try { await signInWithPopup(auth, provider); authModal.classList.add('hidden'); } catch (e) { alert(e.message); } });
+
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const email = document.getElementById('authEmail').value;
         const password = document.getElementById('authPassword').value;
-
         try {
-            if (isSigningUp) {
-                await createUserWithEmailAndPassword(auth, email, password);
-            } else {
-                await signInWithEmailAndPassword(auth, email, password);
-            }
+            if (isSigningUp) await createUserWithEmailAndPassword(auth, email, password);
+            else await signInWithEmailAndPassword(auth, email, password);
             authModal.classList.add('hidden');
-            authForm.reset();
-        } catch (e) {
-            alert(e.message);
-        }
+        } catch (e) { alert(e.message); }
     });
 
     logoutBtn.addEventListener('click', () => signOut(auth));
@@ -683,20 +670,25 @@ function initAuth() {
             avatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=667eea&color=fff`;
             name.innerText = user.displayName || user.email.split('@')[0];
 
-            // Sync from Firestore
             const userRef = doc(db, "users", user.uid);
             onSnapshot(userRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
                     isPro = data.isPro || false;
                     analysisCount = data.analysisCount || 0;
+                    const role = data.role || (user.email === SUPER_ADMIN_EMAIL ? 'admin' : 'user');
+
+                    if (role === 'admin') adminLink.classList.remove('hidden');
+                    else adminLink.classList.add('hidden');
+
                     updatePlanUI();
                 } else {
-                    // Initialize new user in Firestore
+                    const role = user.email === SUPER_ADMIN_EMAIL ? 'admin' : 'user';
                     setDoc(userRef, {
                         email: user.email,
                         isPro: isPro,
                         analysisCount: analysisCount,
+                        role: role,
                         createdAt: new Date().toISOString()
                     });
                 }
@@ -705,10 +697,48 @@ function initAuth() {
             currentUser = null;
             loginBtn.classList.remove('hidden');
             profile.classList.add('hidden');
+            adminLink.classList.add('hidden');
             isPro = localStorage.getItem('ideaiser_pro') === 'true';
             analysisCount = parseInt(localStorage.getItem('ideaiser_count') || '0');
             updatePlanUI();
         }
+    });
+
+    async function fetchUsers() {
+        const q = collection(db, "users");
+        const querySnapshot = await getDocs(q);
+        renderUserTable(querySnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+    }
+
+    function renderUserTable(users) {
+        userTableBody.innerHTML = users.map(u => `
+            <tr>
+                <td>${u.email}</td>
+                <td><span class="role-badge role-${u.role || 'user'}">${u.role || 'user'}</span></td>
+                <td><span class="${u.isPro ? 'pro-badge' : ''}">${u.isPro ? 'YES' : 'NO'}</span></td>
+                <td>
+                    <button class="promote-btn" onclick="window.promoteUser('${u.id}', '${u.role}')" ${u.email === SUPER_ADMIN_EMAIL || u.role === 'admin' ? 'disabled' : ''}>
+                        Make Admin
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.promoteUser = async (uid, currentRole) => {
+        if (currentRole === 'admin') return;
+        const userRef = doc(db, "users", uid);
+        await updateDoc(userRef, { role: 'admin' });
+        alert("User promoted to Admin! 🚀");
+        fetchUsers();
+    };
+
+    userSearch.addEventListener('input', async (e) => {
+        const term = e.target.value.toLowerCase();
+        const q = collection(db, "users");
+        const snap = await getDocs(q);
+        const filtered = snap.docs.filter(d => d.data().email.toLowerCase().includes(term));
+        renderUserTable(filtered.map(d => ({ id: d.id, ...d.data() })));
     });
 }
 
