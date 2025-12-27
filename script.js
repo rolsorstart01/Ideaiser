@@ -665,6 +665,8 @@ function initAuth() {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
+            const isSuperAdmin = user.email.toLowerCase() === SUPER_ADMIN_EMAIL.toLowerCase();
+
             loginBtn.classList.add('hidden');
             profile.classList.remove('hidden');
             avatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=667eea&color=fff`;
@@ -674,19 +676,26 @@ function initAuth() {
             onSnapshot(userRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    isPro = data.isPro || false;
+                    const role = data.role || (isSuperAdmin ? 'admin' : 'user');
+
+                    // Force admin and pro for super admin
+                    if (role === 'admin' || isSuperAdmin) {
+                        adminLink.classList.remove('hidden');
+                        isPro = true;
+                    } else {
+                        adminLink.classList.add('hidden');
+                        isPro = data.isPro || false;
+                    }
+
                     analysisCount = data.analysisCount || 0;
-                    const role = data.role || (user.email === SUPER_ADMIN_EMAIL ? 'admin' : 'user');
-
-                    if (role === 'admin') adminLink.classList.remove('hidden');
-                    else adminLink.classList.add('hidden');
-
                     updatePlanUI();
                 } else {
-                    const role = user.email === SUPER_ADMIN_EMAIL ? 'admin' : 'user';
+                    const role = isSuperAdmin ? 'admin' : 'user';
+                    const initialPro = role === 'admin' ? true : isPro;
+
                     setDoc(userRef, {
                         email: user.email,
-                        isPro: isPro,
+                        isPro: initialPro,
                         analysisCount: analysisCount,
                         role: role,
                         createdAt: new Date().toISOString()
