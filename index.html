@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Ideaiser - AI-powered business idea evaluator that scores and provides detailed feedback to help you build a successful startup">
+    <title>Ideaiser | AI Business Idea Coach</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Animated Background -->
+        <div class="bg-gradient"></div>
+        <div class="bg-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="logo-text">Ideaiser</span>
+            </div>
+            <p class="tagline">Your AI Business Coach • Transform Ideas into Successful Ventures</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section glass-card">
+                <h1 class="section-title">
+                    <span class="gradient-text">Tell Me About Your Business Idea</span>
+                </h1>
+                <p class="section-subtitle">Share your concept in as much detail as possible. Include your target
+                    market, how you'll make money, what problem you're solving, and why you're excited about it. The
+                    more you share, the better I can help!</p>
+
+                <div class="input-wrapper">
+                    <textarea id="ideaInput" class="idea-input"
+                        placeholder="Example: I want to build a mobile app that connects local farmers directly with urban consumers for fresh produce delivery. Users can subscribe to weekly produce boxes, choose specific items, and schedule deliveries. We'll charge a 15% commission on transactions. Our target audience is health-conscious millennials and families who want fresh, organic food but can't easily access farmers markets. Features include farm profiles, sustainability tracking, and recipe suggestions..."
+                        rows="8"></textarea>
+                    <div class="char-counter">
+                        <span id="charCount">0</span> characters • More detail = Better insights
+                    </div>
+                </div>
+
+                <button id="evaluateBtn" class="evaluate-btn">
+                    <span class="btn-text">🚀 Analyze & Help Me Improve</span>
+                    <span class="btn-icon">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                    <div class="btn-loader">
+                        <div class="spinner"></div>
+                        <span>Analyzing your idea...</span>
+                    </div>
+                </button>
+            </section>
+
+            <!-- Results Section (Hidden Initially) -->
+            <section id="resultsSection" class="results-section hidden">
+                <!-- Score Card -->
+                <div class="score-card glass-card">
+                    <div class="score-ring-container">
+                        <svg class="score-ring" viewBox="0 0 200 200">
+                            <circle class="score-ring-bg" cx="100" cy="100" r="85" />
+                            <circle id="scoreRing" class="score-ring-progress" cx="100" cy="100" r="85" />
+                        </svg>
+                        <div class="score-content">
+                            <span id="scoreValue" class="score-value">0</span>
+                            <span class="score-label">out of 100</span>
+                        </div>
+                    </div>
+                    <div class="score-verdict">
+                        <h2 id="verdictText" class="verdict-text">Analyzing...</h2>
+                        <p id="verdictSubtext" class="verdict-subtext">Your idea shows promise</p>
+                    </div>
+                </div>
+
+                <!-- Quick Summary -->
+                <div class="summary-card glass-card">
+                    <h3 class="card-title">💡 Quick Summary</h3>
+                    <p id="quickSummary" class="quick-summary"></p>
+                </div>
+
+                <!-- Category Scores -->
+                <div class="categories-card glass-card">
+                    <h3 class="card-title">📊 Detailed Breakdown</h3>
+                    <div class="categories-grid" id="categoriesGrid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Feedback Tabs -->
+                <div class="feedback-card glass-card">
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-tab="strengths">
+                            <span class="tab-icon">💪</span>
+                            Strengths
+                        </button>
+                        <button class="tab-btn" data-tab="improvements">
+                            <span class="tab-icon">🎯</span>
+                            How to Improve
+                        </button>
+                        <button class="tab-btn" data-tab="action-plan">
+                            <span class="tab-icon">📋</span>
+                            Action Plan
+                        </button>
+                        <button class="tab-btn" data-tab="resources">
+                            <span class="tab-icon">🛠️</span>
+                            Resources
+                        </button>
+                        <button class="tab-btn" data-tab="pivot-ideas">
+                            <span class="tab-icon">🔄</span>
+                            Pivot Ideas
+                        </button>
+                        <button class="tab-btn" data-tab="funding">
+                            <span class="tab-icon">💰</span>
+                            Funding & Investors
+                        </button>
+                        <button class="tab-btn" data-tab="examples">
+                            <span class="tab-icon">📚</span>
+                            Learn From
+                        </button>
+                    </div>
+                    <div class="tabs-content">
+                        <div id="tab-strengths" class="tab-panel active">
+                            <div class="panel-intro">What's working well with your idea:</div>
+                            <ul class="feedback-list strengths-list" id="strengthsList"></ul>
+                        </div>
+                        <div id="tab-improvements" class="tab-panel">
+                            <div class="panel-intro">Specific ways to make your idea 10x stronger:</div>
+                            <ul class="feedback-list improvements-list" id="improvementsList"></ul>
+                        </div>
+                        <div id="tab-action-plan" class="tab-panel">
+                            <div class="panel-intro">Your next steps to validate and launch:</div>
+                            <div class="action-plan-container" id="actionPlanContainer"></div>
+                        </div>
+                        <div id="tab-resources" class="tab-panel">
+                            <div class="panel-intro">Tools and resources to help you build this:</div>
+                            <div class="resources-container" id="resourcesContainer"></div>
+                        </div>
+                        <div id="tab-pivot-ideas" class="tab-panel">
+                            <div class="panel-intro">Alternative directions to consider:</div>
+                            <div class="pivot-ideas-container" id="pivotIdeasContainer"></div>
+                        </div>
+                        <div id="tab-funding" class="tab-panel">
+                            <div class="funding-container">
+                                <!-- Capital Estimation -->
+                                <div class="funding-card capital-card">
+                                    <h4>🌱 Estimated Initial Capital</h4>
+                                    <div class="capital-range" id="capitalRange">$0 - $0</div>
+                                    <p class="capital-desc" id="capitalDesc">Based on typical MVP costs for this
+                                        industry.</p>
+                                </div>
+
+                                <!-- Funding Strategy -->
+                                <div class="funding-card strategy-card">
+                                    <h4>🏁 Recommended Funding Strategy</h4>
+                                    <div id="fundingStrategy" class="strategy-content"></div>
+                                </div>
+
+                                <!-- Investor Pitch -->
+                                <div class="funding-card pitch-card">
+                                    <div class="card-header-row">
+                                        <h4>📧 Investor Cold Email Draft</h4>
+                                        <button class="copy-btn" id="copyPitchBtn" title="Copy to Clipboard">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <path d="M8 4H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2v-2"></path>
+                                                <rect x="8" y="2" width="8" height="4" rx="1"></rect>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="email-preview" id="investorPitch"></div>
+                                </div>
+
+                                <!-- Where to Find -->
+                                <div class="funding-card resources-card">
+                                    <h4>📍 Where to Find Investors</h4>
+                                    <ul class="investor-links" id="investorLinks"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tab-examples" class="tab-panel">
+                            <div class="examples-container">
+                                <div class="examples-section success-section">
+                                    <h4><span class="status-dot success"></span>Success Stories to Learn From</h4>
+                                    <ul class="examples-list" id="successExamples"></ul>
+                                </div>
+                                <div class="examples-section failure-section">
+                                    <h4><span class="status-dot failure"></span>Failures to Learn From</h4>
+                                    <ul class="examples-list" id="failureExamples"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics Card -->
+                <div class="metrics-card glass-card">
+                    <h3 class="card-title">📈 Key Metrics to Track</h3>
+                    <div class="metrics-grid" id="metricsGrid"></div>
+                </div>
+
+                <!-- Go-to-Market Card -->
+                <div class="gtm-card glass-card">
+                    <h3 class="card-title">🚀 Go-to-Market Strategy Ideas</h3>
+                    <div class="gtm-content" id="gtmContent"></div>
+                </div>
+
+                <!-- Validation Questions -->
+                <div class="validation-card glass-card">
+                    <h3 class="card-title">❓ Questions to Answer Before Building</h3>
+                    <ul class="validation-list" id="validationList"></ul>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="newAnalysisBtn" class="action-btn secondary">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 4V10H7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path
+                                d="M3.51 15C4.15839 16.8404 5.38734 18.4202 7.01166 19.5014C8.63598 20.5826 10.5677 21.1066 12.5157 20.9945C14.4637 20.8824 16.3226 20.1402 17.8121 18.8798C19.3017 17.6193 20.3413 15.9096 20.7742 14.0064C21.2072 12.1033 21.0101 10.1134 20.2126 8.33123C19.4152 6.54907 18.0605 5.06286 16.3528 4.08985C14.6451 3.11684 12.6769 2.70973 10.7447 2.92911C8.81245 3.14849 7.02091 3.98261 5.64 5.32L1 10"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        Analyze Another Idea
+                    </button>
+                    <button id="exportBtn" class="action-btn primary">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M7 10L12 15L17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M12 15V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                        Export Full Report
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Built with ✨ by Ideaiser • Helping Entrepreneurs Turn Ideas into Reality</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
