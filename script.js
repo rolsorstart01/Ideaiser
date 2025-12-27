@@ -751,6 +751,12 @@ function initAuth() {
 
                     analysisCount = data.analysisCount || 0;
                     updatePlanUI();
+
+                    // Trigger pending upgrade if applicable
+                    if (pendingUpgrade && !isPro) {
+                        pendingUpgrade = false;
+                        triggerProUpgrade();
+                    }
                 } else {
                     const role = isSuperAdmin ? 'admin' : 'user';
                     const initialPro = role === 'admin' ? true : isPro;
@@ -842,6 +848,7 @@ async function syncToFirebase() {
 // --- Persistence & Plan Logic ---
 let isPro = localStorage.getItem('ideaiser_pro') === 'true';
 let analysisCount = parseInt(localStorage.getItem('ideaiser_count') || '0');
+let pendingUpgrade = false; // Tracks if user wants to upgrade after login
 const MAX_FREE_ANALYSES = 3;
 
 function updatePlanUI() {
@@ -880,9 +887,31 @@ function checkPlanLimit() {
     return true;
 }
 
-function initPayments() {
-    const RAZORPAY_KEY_ID = 'rzp_live_RuaMsQ3mGUXGtH';
+const RAZORPAY_KEY_ID = 'rzp_live_RuaMsQ3mGUXGtH';
 
+function triggerProUpgrade() {
+    if (isPro) return;
+
+    const options = {
+        "key": RAZORPAY_KEY_ID,
+        "amount": "50000", // ₹500 in paise
+        "currency": "INR",
+        "name": "Ideaiser Pro",
+        "description": "3 Months Special Offer",
+        "handler": async function (response) {
+            isPro = true;
+            localStorage.setItem('ideaiser_pro', 'true');
+            await syncToFirebase();
+            updatePlanUI();
+            alert("Welcome to Pro! Your access is now permanent and synced to your account. ✨");
+        },
+        "theme": { "color": "#667eea" }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+}
+
+function initPayments() {
     const proBtn = document.getElementById('proPlanBtn');
     const donateBtn = document.getElementById('donateBtn');
     const donateAmountInput = document.getElementById('donationAmount');
@@ -893,23 +922,14 @@ function initPayments() {
         proBtn.addEventListener('click', () => {
             if (isPro) return;
 
-            const options = {
-                "key": RAZORPAY_KEY_ID,
-                "amount": "50000", // ₹500 in paise
-                "currency": "INR",
-                "name": "Ideaiser Pro",
-                "description": "3 Months Special Offer",
-                "handler": async function (response) {
-                    isPro = true;
-                    localStorage.setItem('ideaiser_pro', 'true');
-                    await syncToFirebase();
-                    updatePlanUI();
-                    alert("Welcome to Pro! Your access is now permanent and synced to your account. ✨");
-                },
-                "theme": { "color": "#667eea" }
-            };
-            const rzp = new Razorpay(options);
-            rzp.open();
+            if (!currentUser) {
+                pendingUpgrade = true;
+                document.getElementById('authModal').classList.remove('hidden');
+                alert("Please log in or sign up first to secure your Pro membership! 🚀");
+                return;
+            }
+
+            triggerProUpgrade();
         });
     }
 
