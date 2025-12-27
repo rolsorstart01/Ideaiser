@@ -3,6 +3,28 @@
  * Advanced AI scoring engine + Strategic Business Coach
  */
 
+// Firebase Imports
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB-thQN6nJD64nWM6gA9IWoxShe4gNoqm4",
+    authDomain: "ideaiser.firebaseapp.com",
+    projectId: "ideaiser",
+    storageBucket: "ideaiser.firebasestorage.app",
+    messagingSenderId: "546979550512",
+    appId: "1:546979550512:web:a0ec6ffe512754d5cc64f5",
+    measurementId: "G-0X55T94B39"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+let currentUser = null;
+
 // ============================================
 // EXTENDED KNOWLEDGE BASE & RESOURCES
 // ============================================
@@ -582,23 +604,69 @@ function fillExampleList(id, items) {
     `).join('') : '';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    new UIController();
-    initPayments();
+// --- Firebase Auth & Firestore Sync ---
+function initAuth() {
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const profile = document.getElementById('userProfile');
+    const avatar = document.getElementById('userAvatar');
+    const name = document.getElementById('userName');
 
-    // Gradient definition for SVG
-    const svg = document.querySelector('.score-ring');
-    if (svg) {
-        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-        defs.innerHTML = `
-            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" style="stop-color:#667eea"/>
-                <stop offset="100%" style="stop-color:#f093fb"/>
-            </linearGradient>
-        `;
-        svg.insertBefore(defs, svg.firstChild);
+    loginBtn.addEventListener('click', async () => {
+        try {
+            await signInWithPopup(auth, provider);
+        } catch (e) { alert("Login failed: " + e.message); }
+    });
+
+    logoutBtn.addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            loginBtn.classList.add('hidden');
+            profile.classList.remove('hidden');
+            avatar.src = user.photoURL;
+            name.innerText = user.displayName;
+
+            // Sync from Firestore
+            const userRef = doc(db, "users", user.uid);
+            onSnapshot(userRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    isPro = data.isPro || false;
+                    analysisCount = data.analysisCount || 0;
+                    updatePlanUI();
+                } else {
+                    // Initialize new user in Firestore
+                    setDoc(userRef, {
+                        email: user.email,
+                        isPro: isPro, // Migrate local storage if exists
+                        analysisCount: analysisCount,
+                        createdAt: new Date().toISOString()
+                    });
+                }
+            });
+        } else {
+            currentUser = null;
+            loginBtn.classList.remove('hidden');
+            profile.classList.add('hidden');
+            // Reset to local data if logged out
+            isPro = localStorage.getItem('ideaiser_pro') === 'true';
+            analysisCount = parseInt(localStorage.getItem('ideaiser_count') || '0');
+            updatePlanUI();
+        }
+    });
+}
+
+async function syncToFirebase() {
+    if (currentUser) {
+        const userRef = doc(db, "users", currentUser.uid);
+        await setDoc(userRef, {
+            isPro,
+            analysisCount
+        }, { merge: true });
     }
-});
+}
 
 // --- Persistence & Plan Logic ---
 let isPro = localStorage.getItem('ideaiser_pro') === 'true';
@@ -607,7 +675,7 @@ const MAX_FREE_ANALYSES = 3;
 
 function updatePlanUI() {
     const proBtn = document.getElementById('proPlanBtn');
-    const pricingSection = document.getElementById('pricingSection');
+    const pricingGrid = document.querySelector('.pricing-grid');
 
     if (isPro) {
         if (proBtn) {
@@ -615,15 +683,21 @@ function updatePlanUI() {
             proBtn.disabled = true;
             proBtn.classList.add('pro-active');
         }
-        // Optionally hide pricing grid if Pro
-        const pricingGrid = document.querySelector('.pricing-grid');
         if (pricingGrid) pricingGrid.style.opacity = "0.7";
+    } else {
+        if (proBtn) {
+            proBtn.innerText = "Upgrade to Pro";
+            proBtn.disabled = false;
+            proBtn.classList.remove('pro-active');
+        }
+        if (pricingGrid) pricingGrid.style.opacity = "1";
     }
 }
 
-function incrementAnalysis() {
+async function incrementAnalysis() {
     analysisCount++;
     localStorage.setItem('ideaiser_count', analysisCount.toString());
+    await syncToFirebase();
 }
 
 function checkPlanLimit() {
@@ -654,11 +728,12 @@ function initPayments() {
                 "currency": "INR",
                 "name": "Ideaiser Pro",
                 "description": "3 Months Special Offer",
-                "handler": function (response) {
+                "handler": async function (response) {
                     isPro = true;
                     localStorage.setItem('ideaiser_pro', 'true');
+                    await syncToFirebase();
                     updatePlanUI();
-                    alert("Welcome to Pro! Your access is now permanent on this browser. ✨");
+                    alert("Welcome to Pro! Your access is now permanent and synced to your account. ✨");
                 },
                 "theme": { "color": "#667eea" }
             };
@@ -689,3 +764,21 @@ function initPayments() {
     }
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    new UIController();
+    initPayments();
+    initAuth();
+
+    // Gradient definition for SVG
+    const svg = document.querySelector('.score-ring');
+    if (svg) {
+        const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+        defs.innerHTML = `
+            <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#667eea"/>
+                <stop offset="100%" style="stop-color:#f093fb"/>
+            </linearGradient>
+        `;
+        svg.insertBefore(defs, svg.firstChild);
+    }
+});
