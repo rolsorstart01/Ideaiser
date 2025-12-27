@@ -254,6 +254,55 @@
                     </button>
                 </div>
             </section>
+            <!-- Pricing Section -->
+            <section id="pricingSection" class="pricing-section">
+                <h2 class="section-title"><span class="gradient-text">Simple, Transparent Pricing</span></h2>
+                <p class="section-subtitle">Choose the plan that fits your entrepreneurial journey.</p>
+
+                <div class="pricing-grid">
+                    <!-- Starter Plan -->
+                    <div class="pricing-card glass-card">
+                        <div class="pricing-header">
+                            <h3 class="plan-name">Starter</h3>
+                            <div class="plan-price">Free</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><span class="feature-icon">✅</span> 3 Detailed analyses / month</li>
+                            <li><span class="feature-icon">✅</span> Full feedback reports</li>
+                            <li><span class="feature-icon">✅</span> Action plan roadmaps</li>
+                            <li><span class="feature-icon">❌</span> Advanced funding strategies</li>
+                        </ul>
+                        <button class="pricing-btn secondary">Current Plan</button>
+                    </div>
+
+                    <!-- Pro Plan -->
+                    <div class="pricing-card glass-card featured">
+                        <div class="featured-badge">MOST POPULAR</div>
+                        <div class="pricing-header">
+                            <h3 class="plan-name">Pro</h3>
+                            <div class="plan-price">$19<span class="price-period">/mo</span></div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><span class="feature-icon">✅</span> Unlimited analyses</li>
+                            <li><span class="feature-icon">✅</span> Advanced funding strategies</li>
+                            <li><span class="feature-icon">✅</span> Investor pitch generator</li>
+                            <li><span class="feature-icon">✅</span> Priority AI processing</li>
+                        </ul>
+                        <button class="pricing-btn primary" id="proPlanBtn">Upgrade to Pro</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Donation Section -->
+            <section id="donationSection" class="donation-section glass-card">
+                <div class="donation-content">
+                    <h2 class="section-title"><span class="gradient-text">Support the Project</span></h2>
+                    <p>If Ideaiser has helped you, consider supporting its development with a small donation.</p>
+                    <button id="donateBtn" class="donate-btn">
+                        <span class="btn-icon">☕</span> Buy me a coffee
+                    </button>
+                </div>
+            </section>
         </main>
 
         <!-- Footer -->
@@ -262,6 +311,8 @@
         </footer>
     </div>
 
+    <!-- Razorpay Scripts -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="script.js"></script>
 </body>
 

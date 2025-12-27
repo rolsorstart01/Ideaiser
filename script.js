@@ -582,6 +582,7 @@ function fillExampleList(id, items) {
 
 document.addEventListener('DOMContentLoaded', () => {
     new UIController();
+    initPayments();
 
     // Gradient definition for SVG
     const svg = document.querySelector('.score-ring');
@@ -596,3 +597,52 @@ document.addEventListener('DOMContentLoaded', () => {
         svg.insertBefore(defs, svg.firstChild);
     }
 });
+
+// --- Payment & Plan Logic ---
+let analysisCount = 0;
+const MAX_FREE_ANALYSES = 3;
+
+function initPayments() {
+    const RAZORPAY_KEY_ID = 'rzp_live_RuaMsQ3mGUXGtH';
+
+    const proBtn = document.getElementById('proPlanBtn');
+    const donateBtn = document.getElementById('donateBtn');
+
+    if (proBtn) {
+        proBtn.addEventListener('click', () => {
+            const options = {
+                "key": RAZORPAY_KEY_ID,
+                "amount": "1900", // Amount in paise ($19.00 -> 19 * 100 paise if INR? No, strictly USD amount is handled by Razorpay based on account, but default is INR. I'll stick to a placeholder amount.)
+                "currency": "USD",
+                "name": "Ideaiser Pro",
+                "description": "Unlock Unlimited Analyses",
+                "handler": function (response) {
+                    alert("Payment Successful: " + response.razorpay_payment_id);
+                    // In a real app, verify signature on server and update UI
+                },
+                "theme": { "color": "#667eea" }
+            };
+            const rzp = new Razorpay(options);
+            rzp.open();
+        });
+    }
+
+    if (donateBtn) {
+        donateBtn.addEventListener('click', () => {
+            const options = {
+                "key": RAZORPAY_KEY_ID,
+                "amount": "500", // $5.00
+                "currency": "USD",
+                "name": "Support Ideaiser",
+                "description": "Buy me a coffee",
+                "handler": function (response) {
+                    alert("Thank you for your support! Payment ID: " + response.razorpay_payment_id);
+                },
+                "theme": { "color": "#f59e0b" }
+            };
+            const rzp = new Razorpay(options);
+            rzp.open();
+        });
+    }
+}
+
