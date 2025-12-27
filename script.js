@@ -5,7 +5,7 @@
 
 // Firebase Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -607,15 +607,70 @@ function fillExampleList(id, items) {
 // --- Firebase Auth & Firestore Sync ---
 function initAuth() {
     const loginBtn = document.getElementById('loginBtn');
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
     const logoutBtn = document.getElementById('logoutBtn');
     const profile = document.getElementById('userProfile');
     const avatar = document.getElementById('userAvatar');
     const name = document.getElementById('userName');
 
-    loginBtn.addEventListener('click', async () => {
+    // Modal elements
+    const authModal = document.getElementById('authModal');
+    const closeAuth = document.getElementById('closeAuth');
+    const showSignIn = document.getElementById('showSignIn');
+    const showSignUp = document.getElementById('showSignUp');
+    const authForm = document.getElementById('emailAuthForm');
+    const authTitle = document.getElementById('authTitle');
+    const authSubmit = document.getElementById('authSubmit');
+
+    let isSigningUp = false;
+
+    // Modal Control
+    loginBtn.addEventListener('click', () => authModal.classList.remove('hidden'));
+    closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
+    window.addEventListener('click', (e) => { if (e.target === authModal) authModal.classList.add('hidden'); });
+
+    // Toggle Sign In / Sign Up
+    showSignIn.addEventListener('click', () => {
+        isSigningUp = false;
+        showSignIn.classList.add('active');
+        showSignUp.classList.remove('active');
+        authTitle.innerText = "Welcome Back";
+        authSubmit.innerText = "Sign In";
+    });
+
+    showSignUp.addEventListener('click', () => {
+        isSigningUp = true;
+        showSignUp.classList.add('active');
+        showSignIn.classList.remove('active');
+        authTitle.innerText = "Create Account";
+        authSubmit.innerText = "Sign Up";
+    });
+
+    // Google Login
+    googleLoginBtn.addEventListener('click', async () => {
         try {
             await signInWithPopup(auth, provider);
+            authModal.classList.add('hidden');
         } catch (e) { alert("Login failed: " + e.message); }
+    });
+
+    // Email/Password Auth
+    authForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('authEmail').value;
+        const password = document.getElementById('authPassword').value;
+
+        try {
+            if (isSigningUp) {
+                await createUserWithEmailAndPassword(auth, email, password);
+            } else {
+                await signInWithEmailAndPassword(auth, email, password);
+            }
+            authModal.classList.add('hidden');
+            authForm.reset();
+        } catch (e) {
+            alert(e.message);
+        }
     });
 
     logoutBtn.addEventListener('click', () => signOut(auth));
@@ -625,8 +680,8 @@ function initAuth() {
             currentUser = user;
             loginBtn.classList.add('hidden');
             profile.classList.remove('hidden');
-            avatar.src = user.photoURL;
-            name.innerText = user.displayName;
+            avatar.src = user.photoURL || `https://ui-avatars.com/api/?name=${user.email}&background=667eea&color=fff`;
+            name.innerText = user.displayName || user.email.split('@')[0];
 
             // Sync from Firestore
             const userRef = doc(db, "users", user.uid);
@@ -640,7 +695,7 @@ function initAuth() {
                     // Initialize new user in Firestore
                     setDoc(userRef, {
                         email: user.email,
-                        isPro: isPro, // Migrate local storage if exists
+                        isPro: isPro,
                         analysisCount: analysisCount,
                         createdAt: new Date().toISOString()
                     });
@@ -650,7 +705,6 @@ function initAuth() {
             currentUser = null;
             loginBtn.classList.remove('hidden');
             profile.classList.add('hidden');
-            // Reset to local data if logged out
             isPro = localStorage.getItem('ideaiser_pro') === 'true';
             analysisCount = parseInt(localStorage.getItem('ideaiser_count') || '0');
             updatePlanUI();
