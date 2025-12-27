@@ -607,18 +607,18 @@ function initPayments() {
 
     const proBtn = document.getElementById('proPlanBtn');
     const donateBtn = document.getElementById('donateBtn');
+    const donateAmountInput = document.getElementById('donationAmount');
 
     if (proBtn) {
         proBtn.addEventListener('click', () => {
             const options = {
                 "key": RAZORPAY_KEY_ID,
-                "amount": "1900", // Amount in paise ($19.00 -> 19 * 100 paise if INR? No, strictly USD amount is handled by Razorpay based on account, but default is INR. I'll stick to a placeholder amount.)
-                "currency": "USD",
+                "amount": "50000", // ₹500 in paise
+                "currency": "INR",
                 "name": "Ideaiser Pro",
-                "description": "Unlock Unlimited Analyses",
+                "description": "3 Months Special Offer",
                 "handler": function (response) {
-                    alert("Payment Successful: " + response.razorpay_payment_id);
-                    // In a real app, verify signature on server and update UI
+                    alert("Welcome to Pro! Payment ID: " + response.razorpay_payment_id);
                 },
                 "theme": { "color": "#667eea" }
             };
@@ -629,14 +629,17 @@ function initPayments() {
 
     if (donateBtn) {
         donateBtn.addEventListener('click', () => {
+            const amount = donateAmountInput ? donateAmountInput.value : 500;
+            if (amount < 1) return alert("Please enter at least ₹1");
+
             const options = {
                 "key": RAZORPAY_KEY_ID,
-                "amount": "500", // $5.00
-                "currency": "USD",
+                "amount": (amount * 100).toString(), // Convert to paise
+                "currency": "INR",
                 "name": "Support Ideaiser",
-                "description": "Buy me a coffee",
+                "description": "Project Development Support",
                 "handler": function (response) {
-                    alert("Thank you for your support! Payment ID: " + response.razorpay_payment_id);
+                    alert("Thank you for your generosity! Payment ID: " + response.razorpay_payment_id);
                 },
                 "theme": { "color": "#f59e0b" }
             };
