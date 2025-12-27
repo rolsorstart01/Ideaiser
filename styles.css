@@ -192,7 +192,7 @@ body {
     margin-bottom: 1rem;
 }
 
-.logo-icon {
+.logo-img {
     width: 48px;
     height: 48px;
     display: flex;
@@ -200,13 +200,14 @@ body {
     justify-content: center;
     background: var(--accent-gradient);
     border-radius: var(--radius-md);
-    color: white;
     box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+    overflow: hidden;
 }
 
-.logo-icon svg {
-    width: 28px;
-    height: 28px;
+.logo-img img {
+    width: 60%;
+    height: 60%;
+    object-fit: contain;
 }
 
 .logo-text {
