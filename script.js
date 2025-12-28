@@ -713,15 +713,23 @@ function initAuth() {
     const userTableBody = document.getElementById('userTableBody');
 
     let isSigningUp = false;
+    let unsubscribeAdminUsers = null;
+    let allUsers = []; // Local cache for real-time updates
 
     // Modal Controls
     loginBtn.addEventListener('click', () => authModal.classList.remove('hidden'));
     closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
     adminLink.addEventListener('click', () => {
         adminModal.classList.remove('hidden');
-        fetchUsers();
+        startAdminSync();
     });
-    closeAdmin.addEventListener('click', () => adminModal.classList.add('hidden'));
+    closeAdmin.addEventListener('click', () => {
+        adminModal.classList.add('hidden');
+        if (unsubscribeAdminUsers) {
+            unsubscribeAdminUsers();
+            unsubscribeAdminUsers = null;
+        }
+    });
 
     // Auth Toggles
     const showSignIn = document.getElementById('showSignIn');
@@ -891,10 +899,21 @@ function initAuth() {
         }
     });
 
-    async function fetchUsers() {
+    function startAdminSync() {
+        if (unsubscribeAdminUsers) return;
+
         const q = collection(db, "users");
-        const querySnapshot = await getDocs(q);
-        renderUserTable(querySnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
+        unsubscribeAdminUsers = onSnapshot(q, (querySnapshot) => {
+            allUsers = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            refreshUserTable();
+        });
+    }
+
+    function refreshUserTable() {
+        if (!allUsers) return;
+        const term = userSearch.value.toLowerCase();
+        const filtered = allUsers.filter(u => u.email.toLowerCase().includes(term));
+        renderUserTable(filtered);
     }
 
     function renderUserTable(users) {
@@ -928,7 +947,6 @@ function initAuth() {
             isPro: true
         });
         alert("User promoted to Admin and granted Pro access! 🚀");
-        fetchUsers();
     };
 
     window.demoteUser = async (uid) => {
@@ -942,7 +960,6 @@ function initAuth() {
                 role: 'user'
             });
             alert("Admin privileges revoked.");
-            fetchUsers();
         }
     };
 
@@ -951,15 +968,10 @@ function initAuth() {
         const userRef = doc(db, "users", uid);
         await updateDoc(userRef, { isPro: !currentStatus });
         alert(`User Pro status updated to ${!currentStatus ? 'Active' : 'Free'}`);
-        fetchUsers();
     };
 
-    userSearch.addEventListener('input', async (e) => {
-        const term = e.target.value.toLowerCase();
-        const q = collection(db, "users");
-        const snap = await getDocs(q);
-        const filtered = snap.docs.filter(d => d.data().email.toLowerCase().includes(term));
-        renderUserTable(filtered.map(d => ({ id: d.id, ...d.data() })));
+    userSearch.addEventListener('input', () => {
+        refreshUserTable();
     });
 }
 
