@@ -694,6 +694,20 @@ function initAuth() {
     });
     closeSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
 
+    // Footer Settings Link
+    const footerSettingsLink = document.getElementById('footerSettingsLink');
+    if (footerSettingsLink) {
+        footerSettingsLink.addEventListener('click', () => {
+            if (currentUser) {
+                populateSettings();
+                settingsModal.classList.remove('hidden');
+            } else {
+                authModal.classList.remove('hidden');
+                alert("Please log in to access your account settings! 🚀");
+            }
+        });
+    }
+
     // Admin Panel Elements
     const userSearch = document.getElementById('userSearch');
     const userTableBody = document.getElementById('userTableBody');
