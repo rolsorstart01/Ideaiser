@@ -71,36 +71,42 @@
             <div class="orb orb-3"></div>
         </div>
 
-        <!-- Header -->
-        <header class="header">
-            <div class="logo">
-                <div class="logo-img">
-                    <img src="Ideaiser.png" alt="Ideaiser Logo">
+        <!-- Top Navigation -->
+        <nav class="top-nav glass-card">
+            <div class="nav-container">
+                <div class="logo">
+                    <div class="logo-img">
+                        <img src="Ideaiser.png" alt="Ideaiser Logo">
+                    </div>
+                    <span class="logo-text">Ideaiser</span>
                 </div>
-                <span class="logo-text">Ideaiser</span>
-            </div>
 
-            <!-- Auth Section -->
-            <div class="auth-box">
-                <div id="userProfile" class="user-profile hidden">
-                    <img id="userAvatar" src="" alt="User">
-                    <span id="userName"></span>
-                    <button id="settingsBtn" class="settings-btn" title="Account Settings">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path
-                                d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.1a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.1a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.1a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z">
-                            </path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
+                <!-- Auth \u0026 Settings Section -->
+                <div class="auth-box">
+                    <div id="userProfile" class="user-profile hidden">
+                        <img id="userAvatar" src="" alt="User">
+                        <span id="userName"></span>
+                        <div class="nav-actions">
+                            <button id="settingsBtn" class="settings-btn" title="Account Settings">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path
+                                        d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.1a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.1a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.1a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z">
+                                    </path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                            <button id="adminLink" class="admin-link hidden">Admin</button>
+                            <button id="logoutBtn" class="logout-btn">Sign Out</button>
+                        </div>
+                    </div>
+                    <button id="loginBtn" class="login-btn action-btn secondary">
+                        Login / Sign Up
                     </button>
-                    <button id="adminLink" class="admin-link hidden">Admin Panel</button>
-                    <button id="logoutBtn" class="logout-btn">Sign Out</button>
                 </div>
-                <button id="loginBtn" class="login-btn">
-                    Login / Sign Up
-                </button>
             </div>
+        </nav>
 
+        <header class="hero-header">
             <p class="tagline">Your AI Business Coach • Transform Ideas into Successful Ventures</p>
         </header>
 
@@ -537,9 +543,9 @@
             <p>Built with ✨ by Ideaiser • Helping Entrepreneurs Turn Ideas into Reality</p>
             <div class="legal-links">
                 <a href="privacy.html">Privacy Policy</a>
-                <a href="terms.html">Terms & Conditions</a>
-                <a href="refund.html">Refund & Cancellation</a>
-                <button id="footerSettingsLink" class="footer-link">Account Settings</button>
+                <a href="terms.html">Terms \u0026 Conditions</a>
+                <a href="refund.html">Refund \u0026 Cancellation</a>
+                <a href="#" id="footerSettingsLink" class="footer-link">Account Settings</a>
             </div>
         </footer>
     </div>
