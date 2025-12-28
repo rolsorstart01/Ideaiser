@@ -719,17 +719,42 @@ function initAuth() {
     // Modal Controls
     loginBtn.addEventListener('click', () => authModal.classList.remove('hidden'));
     closeAuth.addEventListener('click', () => authModal.classList.add('hidden'));
+
     adminLink.addEventListener('click', () => {
         adminModal.classList.remove('hidden');
+        adminModal.style.display = 'flex';
         startAdminSync();
     });
+
     closeAdmin.addEventListener('click', () => {
         adminModal.classList.add('hidden');
-        if (unsubscribeAdminUsers) {
+        adminModal.style.display = '';
+        stopAdminSync();
+    });
+
+    closeSettings.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+        settingsModal.style.display = '';
+    });
+
+    // Logo Link behavior
+    const logoLink = document.querySelector('.logo-link');
+    if (logoLink) {
+        logoLink.addEventListener('click', () => {
+            [authModal, adminModal, settingsModal].forEach(m => {
+                m.classList.add('hidden');
+                m.style.display = '';
+            });
+            stopAdminSync();
+        });
+    }
+
+    function stopAdminSync() {
+        if (typeof unsubscribeAdminUsers === 'function') {
             unsubscribeAdminUsers();
             unsubscribeAdminUsers = null;
         }
-    });
+    }
 
     // Auth Toggles
     const showSignIn = document.getElementById('showSignIn');
@@ -904,15 +929,24 @@ function initAuth() {
 
         const q = collection(db, "users");
         unsubscribeAdminUsers = onSnapshot(q, (querySnapshot) => {
-            allUsers = querySnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            allUsers = querySnapshot.docs.map(d => ({
+                id: d.id,
+                ...d.data()
+            }));
             refreshUserTable();
+        }, (error) => {
+            console.error("Admin Sync Error:", error);
         });
     }
 
     function refreshUserTable() {
         if (!allUsers) return;
-        const term = userSearch.value.toLowerCase();
-        const filtered = allUsers.filter(u => u.email.toLowerCase().includes(term));
+        const term = userSearch.value.toLowerCase().trim();
+        const filtered = allUsers.filter(u => {
+            const email = (u.email || "").toLowerCase();
+            const name = (u.displayName || "").toLowerCase();
+            return email.includes(term) || name.includes(term);
+        });
         renderUserTable(filtered);
     }
 
