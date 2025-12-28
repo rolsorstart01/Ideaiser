@@ -85,6 +85,14 @@
                 <div id="userProfile" class="user-profile hidden">
                     <img id="userAvatar" src="" alt="User">
                     <span id="userName"></span>
+                    <button id="settingsBtn" class="settings-btn" title="Account Settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path
+                                d="M12.22 2h-.44a2 2 0 00-2 2v.18a2 2 0 01-1 1.73l-.43.25a2 2 0 01-2 0l-.15-.08a2 2 0 00-2.73.73l-.22.38a2 2 0 00.73 2.73l.15.1a2 2 0 011 1.72v.51a2 2 0 01-1 1.74l-.15.1a2 2 0 00-.73 2.73l.22.38a2 2 0 002.73.73l.15-.08a2 2 0 012 0l.43.25a2 2 0 011 1.73V20a2 2 0 002 2h.44a2 2 0 002-2v-.18a2 2 0 011-1.73l.43-.25a2 2 0 012 0l.15.08a2 2 0 002.73-.73l.22-.39a2 2 0 00-.73-2.73l-.15-.1a2 2 0 01-1-1.74v-.5a2 2 0 011-1.74l.15-.1a2 2 0 00.73-2.73l-.22-.38a2 2 0 00-2.73-.73l-.15.08a2 2 0 01-2 0l-.43-.25a2 2 0 01-1-1.73V4a2 2 0 00-2-2z">
+                            </path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
                     <button id="adminLink" class="admin-link hidden">Admin Panel</button>
                     <button id="logoutBtn" class="logout-btn">Sign Out</button>
                 </div>
@@ -417,6 +425,85 @@
                     </button>
                 </div>
             </section>
+            <!-- Settings Modal -->
+            <div id="settingsModal" class="modal hidden">
+                <div class="modal-content settings-modal-card glass">
+                    <button class="close-modal" id="closeSettings">&times;</button>
+                    <h2 class="gradient-text">Account Settings</h2>
+
+                    <div class="settings-sections">
+                        <!-- Profile Section -->
+                        <section class="settings-section">
+                            <div class="section-header">
+                                <span class="section-icon">👤</span>
+                                <h3>Profile Management</h3>
+                            </div>
+                            <div class="profile-preview">
+                                <img id="settingsAvatar" src="" alt="Profile">
+                                <div class="profile-info">
+                                    <input type="text" id="settingsNameInput" placeholder="Enter name">
+                                    <p id="settingsEmail" class="email-text"></p>
+                                </div>
+                            </div>
+                            <button id="updateProfileBtn" class="action-btn primary sm">Update Profile</button>
+                        </section>
+
+                        <!-- Subscription Section -->
+                        <section class="settings-section">
+                            <div class="section-header">
+                                <span class="section-icon">💎</span>
+                                <h3>Subscription & Plan</h3>
+                            </div>
+                            <div class="plan-status-card">
+                                <div class="plan-info">
+                                    <span id="currentPlanBadge" class="plan-badge">Starter</span>
+                                    <p id="planDetails" class="plan-details">3 analyses / month</p>
+                                </div>
+                                <div class="plan-actions">
+                                    <button id="settingsUpgradeBtn" class="action-btn primary sm">Upgrade to
+                                        Pro</button>
+                                    <button id="cancelPlanBtn" class="action-btn danger-outline sm hidden">Cancel
+                                        Plan</button>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Usage Section -->
+                        <section class="settings-section">
+                            <div class="section-header">
+                                <span class="section-icon">📊</span>
+                                <h3>Usage Statistics</h3>
+                            </div>
+                            <div class="usage-stats">
+                                <div class="usage-item">
+                                    <span class="usage-label">Analyses Used:</span>
+                                    <span id="analysisUsedCount" class="usage-value">0</span>
+                                </div>
+                                <div class="usage-item">
+                                    <span class="usage-label">Daily Average:</span>
+                                    <span id="dailyAvgCount" class="usage-value">0.4</span>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Preferences Section -->
+                        <section class="settings-section">
+                            <div class="section-header">
+                                <span class="section-icon">🎨</span>
+                                <h3>Preferences</h3>
+                            </div>
+                            <div class="preference-item">
+                                <span>Theme Preference</span>
+                                <button id="themeToggle" class="theme-toggle-btn">
+                                    <span class="toggle-icon">🌙</span>
+                                    <span id="themeName">Dark Mode</span>
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+
             <!-- Admin Panel Modal -->
             <div id="adminModal" class="modal hidden">
                 <div class="modal-content admin-modal-card glass">

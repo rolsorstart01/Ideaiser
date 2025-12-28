@@ -5,7 +5,7 @@
 
 // Firebase Imports
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, onSnapshot, collection, getDocs, query, where, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -681,8 +681,18 @@ function initAuth() {
     // Modals
     const authModal = document.getElementById('authModal');
     const adminModal = document.getElementById('adminModal');
+    const settingsModal = document.getElementById('settingsModal');
     const closeAuth = document.getElementById('closeAuth');
     const closeAdmin = document.getElementById('closeAdmin');
+    const closeSettings = document.getElementById('closeSettings');
+
+    // Settings Toggle
+    const settingsBtn = document.getElementById('settingsBtn');
+    settingsBtn.addEventListener('click', () => {
+        populateSettings();
+        settingsModal.classList.remove('hidden');
+    });
+    closeSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
 
     // Admin Panel Elements
     const userSearch = document.getElementById('userSearch');
@@ -721,6 +731,92 @@ function initAuth() {
             authModal.classList.add('hidden');
         } catch (e) { alert(e.message); }
     });
+
+    // Profile Update Logic
+    document.getElementById('updateProfileBtn').addEventListener('click', async () => {
+        const newName = document.getElementById('settingsNameInput').value;
+        if (!newName || !currentUser) return;
+
+        try {
+            await updateProfile(currentUser, { displayName: newName });
+            const userRef = doc(db, "users", currentUser.uid);
+            await updateDoc(userRef, { displayName: newName });
+            alert("Profile updated successfully! ✨");
+            name.innerText = newName;
+        } catch (e) { alert(e.message); }
+    });
+
+    // Subscription Cancellation
+    document.getElementById('cancelPlanBtn').addEventListener('click', async () => {
+        if (confirm("Are you sure you want to cancel your Pro plan? You'll lose access to unlimited analyses and advanced features.")) {
+            isPro = false;
+            localStorage.setItem('ideaiser_pro', 'false');
+            await syncToFirebase();
+            updatePlanUI();
+            populateSettings();
+            alert("Subscription cancelled. You are now on the Starter plan.");
+        }
+    });
+
+    // Upgrade from Settings
+    document.getElementById('settingsUpgradeBtn').addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+        document.getElementById('pricingSection').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const themeName = document.getElementById('themeName');
+    const themeIcon = themeToggle.querySelector('.toggle-icon');
+
+    themeToggle.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-theme');
+        localStorage.setItem('ideaiser_theme', isLight ? 'light' : 'dark');
+        updateThemeUI(isLight);
+    });
+
+    function updateThemeUI(isLight) {
+        themeName.innerText = isLight ? 'Light Mode' : 'Dark Mode';
+        themeIcon.innerText = isLight ? '☀️' : '🌙';
+    }
+
+    // Load saved theme
+    if (localStorage.getItem('ideaiser_theme') === 'light') {
+        document.body.classList.add('light-theme');
+        updateThemeUI(true);
+    }
+
+    function populateSettings() {
+        if (!currentUser) return;
+
+        document.getElementById('settingsAvatar').src = currentUser.photoURL || `https://ui-avatars.com/api/?name=${currentUser.email}&background=667eea&color=fff`;
+        document.getElementById('settingsNameInput').value = currentUser.displayName || currentUser.email.split('@')[0];
+        document.getElementById('settingsEmail').innerText = currentUser.email;
+
+        const planBadge = document.getElementById('currentPlanBadge');
+        const planDetails = document.getElementById('planDetails');
+        const upgradeBtn = document.getElementById('settingsUpgradeBtn');
+        const cancelBtn = document.getElementById('cancelPlanBtn');
+
+        if (isPro) {
+            planBadge.innerText = "Pro Plan ✨";
+            planBadge.style.background = "var(--accent-gradient)";
+            planDetails.innerText = "Unlimited analyses & Priority processing";
+            upgradeBtn.classList.add('hidden');
+            cancelBtn.classList.remove('hidden');
+        } else {
+            planBadge.innerText = "Starter Plan";
+            planBadge.style.background = "rgba(255, 255, 255, 0.1)";
+            planDetails.innerText = "3 analyses / month";
+            upgradeBtn.classList.remove('hidden');
+            cancelBtn.classList.add('hidden');
+        }
+
+        document.getElementById('analysisUsedCount').innerText = analysisCount;
+        // Mock daily average
+        const daysActive = Math.max(1, Math.floor((new Date() - new Date(currentUser.metadata.creationTime)) / (1000 * 60 * 60 * 24)));
+        document.getElementById('dailyAvgCount').innerText = (analysisCount / daysActive).toFixed(1);
+    }
 
     logoutBtn.addEventListener('click', () => signOut(auth));
 
