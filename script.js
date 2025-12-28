@@ -908,6 +908,9 @@ function initAuth() {
                         <button class="promote-btn" onclick="window.promoteUser('${u.id}', '${u.role}')" ${u.email === SUPER_ADMIN_EMAIL || u.role === 'admin' ? 'disabled' : ''}>
                             Make Admin
                         </button>
+                        <button class="demote-btn" onclick="window.demoteUser('${u.id}')" ${u.email === SUPER_ADMIN_EMAIL || u.role !== 'admin' ? 'disabled' : ''}>
+                            Remove Admin
+                        </button>
                         <button class="toggle-pro-btn" onclick="window.toggleProStatus('${u.id}', ${u.isPro})" ${currentUser.email !== SUPER_ADMIN_EMAIL ? 'disabled' : ''}>
                             Toggle Pro
                         </button>
@@ -926,6 +929,21 @@ function initAuth() {
         });
         alert("User promoted to Admin and granted Pro access! 🚀");
         fetchUsers();
+    };
+
+    window.demoteUser = async (uid) => {
+        if (currentUser.email !== SUPER_ADMIN_EMAIL) {
+            alert("Only the Super Admin can revoke admin privileges.");
+            return;
+        }
+        if (confirm("Are you sure you want to remove admin privileges for this user?")) {
+            const userRef = doc(db, "users", uid);
+            await updateDoc(userRef, {
+                role: 'user'
+            });
+            alert("Admin privileges revoked.");
+            fetchUsers();
+        }
     };
 
     window.toggleProStatus = async (uid, currentStatus) => {
