@@ -1,11 +1,7 @@
 User-agent: *
 Allow: /
-
 Sitemap: https://rolsorstart01.github.io/Ideaiser/sitemap.xml
-
 User-agent: Googlebot
 Allow: /
-Disallow: /404.html
-
 User-agent: Bingbot
 Allow: /
