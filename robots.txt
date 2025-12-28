@@ -3,7 +3,6 @@ Allow: /
 
 Sitemap: https://rolsorstart01.github.io/Ideaiser/sitemap.xml
 
-# GitHub Pages optimization
 User-agent: Googlebot
 Allow: /
 Disallow: /404.html
